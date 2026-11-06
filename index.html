@@ -1,0 +1,3704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aman Down Offline WhatsApp Server </title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    :root {
+      --theme-primary: #2d1b69;
+      --theme-secondary: #1a0f3d;
+      --theme-bg: linear-gradient(135deg, #1a0f3d 0%, #2d1b69 50%, #4a2b8f 100%);
+      --theme-surface: rgba(45, 27, 105, 0.85);
+      --theme-text: #ffffff;
+      --theme-text-secondary: #b8a9d9;
+      --theme-border: rgba(184, 169, 217, 0.2);
+      --theme-accent: #00d4ff;
+      --theme-accent-secondary: #7c3aed;
+      --theme-success: #10b981;
+      --theme-error: #ef4444;
+      --theme-warning: #f59e0b;
+      --theme-card-hover: rgba(0, 212, 255, 0.1);
+    }
+
+    [data-theme="light"] {
+      --theme-primary: #f1f5f9;
+      --theme-secondary: #e2e8f0;
+      --theme-bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+      --theme-surface: rgba(255, 255, 255, 0.9);
+      --theme-text: #0f172a;
+      --theme-text-secondary: #475569;
+      --theme-border: rgba(15, 23, 42, 0.1);
+      --theme-accent: #2563eb;
+      --theme-accent-secondary: #7c3aed;
+      --theme-card-hover: rgba(37, 99, 235, 0.05);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--theme-bg);
+      background-attachment: fixed;
+      color: var(--theme-text);
+      overflow-x: hidden;
+      transition: all 0.3s ease;
+      min-height: 100vh;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 65px;
+      background: var(--theme-surface);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--theme-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .status-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .sidebar-toggle {
+      background: var(--theme-accent);
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 10px 15px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar-toggle:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0, 212, 255, 0.5);
+    }
+
+    .server-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--theme-text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(90deg, var(--theme-accent) 0%, var(--theme-accent-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .server-name i {
+      font-size: 28px;
+      color: #25D366;
+      -webkit-text-fill-color: #25D366;
+    }
+
+    .status-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .theme-switcher {
+      background: var(--theme-accent);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .theme-switcher:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0, 212, 255, 0.5);
+    }
+
+    .theme-switcher i {
+      font-size: 18px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 65px;
+      left: 0;
+      width: 280px;
+      height: calc(100vh - 65px);
+      background: var(--theme-surface);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--theme-border);
+      padding: 25px 0;
+      z-index: 99;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .sidebar.hidden {
+      transform: translateX(-100%);
+    }
+
+    .sidebar.show {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      padding: 0 25px 25px 25px;
+      border-bottom: 1px solid var(--theme-border);
+      margin-bottom: 20px;
+    }
+
+    .sidebar-header h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--theme-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 0 15px;
+    }
+
+    .sidebar-menu li {
+      margin-bottom: 8px;
+    }
+
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 14px 18px;
+      color: var(--theme-text);
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .sidebar-menu a:hover {
+      background: linear-gradient(90deg, var(--theme-accent) 0%, var(--theme-accent-secondary) 100%);
+      color: white;
+      transform: translateX(5px);
+    }
+
+    .sidebar-menu a.active {
+      background: linear-gradient(90deg, var(--theme-accent) 0%, var(--theme-accent-secondary) 100%);
+      color: white;
+    }
+
+    .sidebar-menu i {
+      font-size: 20px;
+      width: 24px;
+      text-align: center;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 280px;
+      margin-top: 65px;
+      padding: 30px;
+      min-height: calc(100vh - 65px);
+      transition: margin-left 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .main-content.expanded {
+      margin-left: 0;
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--theme-surface);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--theme-border);
+      padding: 40px 30px;
+      margin-left: 280px;
+      transition: margin-left 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer.expanded {
+      margin-left: 0;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 50px;
+    }
+
+    .footer-section h4 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--theme-accent);
+    }
+
+    .footer-section p {
+      color: var(--theme-text-secondary);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 12px;
+    }
+
+    .footer-links a {
+      color: var(--theme-text-secondary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+      font-size: 15px;
+    }
+
+    .footer-links a:hover {
+      color: var(--theme-accent);
+    }
+
+    .social-icons {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .social-icons a {
+      width: 45px;
+      height: 45px;
+      background: var(--theme-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--theme-text);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 18px;
+    }
+
+    .social-icons a:hover {
+      background: var(--theme-accent);
+      color: white;
+      transform: translateY(-5px);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 25px;
+      border-top: 1px solid var(--theme-border);
+      color: var(--theme-text-secondary);
+      font-size: 14px;
+    }
+
+    /* Approval Page */
+    .approval-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .approval-card {
+      background: var(--theme-surface);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--theme-border);
+      border-radius: 8px;
+      padding: 50px 40px;
+      width: 100%;
+      max-width: 100%;
+      margin: 0 2.5%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      animation: fadeInUp 0.6s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .approval-header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+    /* Teddy Rulex Entry Logo */
+    .teddy-rulex-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 22px;
+      padding: 12px 22px;
+      border: 1px solid rgba(0, 212, 255, 0.35);
+      border-radius: 18px;
+      background: rgba(0, 212, 255, 0.08);
+      box-shadow: 0 8px 30px rgba(0, 212, 255, 0.18);
+      animation: logoGlow 2.5s ease-in-out infinite;
+    }
+
+    .teddy-rulex-logo .teddy-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      background: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
+      box-shadow: 0 0 22px rgba(0, 212, 255, 0.45);
+    }
+
+    .teddy-rulex-logo .brand-text {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      background: linear-gradient(90deg, #00d4ff 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    @keyframes logoGlow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+
+    .approval-header i {
+      font-size: 80px;
+      color: #25D366;
+      margin-bottom: 25px;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .approval-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, var(--theme-accent) 0%, var(--theme-accent-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+        .approval-header p {
+      color: var(--theme-text-secondary);
+      font-size: 16px;
+    }
+
+    .approval-key-display {
+      background: rgba(0, 212, 255, 0.1);
+      border: 1.1px dashed var(--theme-accent);
+      border-radius: 8px;
+      padding: 25px;
+      margin: 30px 0;
+      text-align: center;
+    }
+
+    .approval-key-display label {
+      display: block;
+      font-size: 13px;
+      color: var(--theme-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .approval-key-display .key {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--theme-accent);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 3px;
+      word-break: break-all;
+    }
+
+    .approval-status {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #ef4444;
+      padding: 18px;
+      border-radius: 8px;
+      margin: 25px 0;
+      text-align: center;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 15px;
+    }
+
+    .approval-status.approved {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #10b981;
+    }
+
+    .approval-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--theme-accent) 0%, var(--theme-accent-secondary) 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 212, 255, 0.5);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-whatsapp {
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      color: white;
+    }
+
+    .btn-whatsapp:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(37, 211, 102, 0.4);
+    }
+
+    .btn.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .btn .spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    .btn.loading .spinner {
+      display: block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Auth Pages */
+    .auth-page {
+      display: none;
+      padding: 40px 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .auth-card {
+      background: var(--theme-surface);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--theme-border);
+      border-radius: 8px;
+      padding: 50px 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .auth-header h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, var(--theme-accent) 0%, var(--theme-accent-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--theme-text);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1.3px solid var(--theme-border);
+      border-radius: 8px;
+      color: var(--theme-text);
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--theme-accent);
+      background: rgba(0, 0, 0, 0.3);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.2);
+    }
+
+    .form-group input::placeholder {
+      color: var(--theme-text-secondary);
+    }
+
+    .auth-switch {
+      text-align: center;
+      margin-top: 25px;
+      color: var(--theme-text-secondary);
+      font-size: 15px;
+    }
+
+    .auth-switch a {
+      color: var(--theme-accent);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .auth-switch a:hover {
+      text-decoration: underline;
+    }
+
+    .error-msg, .success-msg {
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 22px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .error-msg {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #ef4444;
+    }
+
+    .success-msg {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #10b981;
+    }
+
+    /* Dashboard */
+    .dashboard {
+      display: none;
+    }
+
+    .dashboard-header {
+      background: var(--theme-surface);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--theme-border);
+      border-radius: 8px;
+      padding: 35px;
+      margin-bottom: 35px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .dashboard-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-badge.admin {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+    }
+
+    .user-badge.user {
+      background: linear-gradient(135deg, var(--theme-accent) 0%, var(--theme-accent-secondary) 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+    }
+    
+        .user-badge i {
+      font-size: 16px;
+    }
+
+    .dashboard-subtitle {
+      color: var(--theme-text-secondary);
+      font-size: 15px;
+      margin-bottom: 30px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 35px;
+    }
+
+    .stat-card {
+      background: var(--theme-surface);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--theme-border);
+      border-radius: 8px;
+      padding: 30px;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--theme-accent), var(--theme-accent-secondary));
+    }
+
+    .stat-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 40px rgba(0, 212, 255, 0.3);
+    }
+
+    .stat-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .stat-card-title {
+      font-size: 13px;
+      color: var(--theme-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      font-weight: 600;
+    }
+
+    .stat-card-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(0, 212, 255, 0.15);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--theme-accent);
+    }
+
+    .stat-card-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--theme-text);
+      margin-bottom: 8px;
+      line-height: 1;
+    }
+
+    .stat-card-change {
+      font-size: 14px;
+      color: var(--theme-success);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+
+    .dashboard-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .dashboard-actions button {
+      width: 100%;
+    }
+
+    .sessions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 25px;
+    }
+
+
+    .neon-sessions-stage {
+      perspective: 1200px;
+      transform-style: preserve-3d;
+    }
+
+    .neon-sessions-stage .sessions-grid {
+      transform-style: preserve-3d;
+    }
+
+    /* Modern Session Card */
+    /* Neon 3D All Sessions */
+    .session-card {
+      background:
+        linear-gradient(145deg, rgba(18, 12, 55, 0.96), rgba(7, 16, 45, 0.92));
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(0, 212, 255, 0.38);
+      border-radius: 18px;
+      padding: 28px;
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 18px 35px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(124, 58, 237, 0.12) inset,
+        0 0 28px rgba(0, 212, 255, 0.12);
+      transform: perspective(900px) rotateX(0deg) translateZ(0);
+    }
+
+    .session-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -10%;
+      width: 120%;
+      height: 5px;
+      background: linear-gradient(90deg, #00d4ff, #7c3aed, #25D366, #00d4ff);
+      background-size: 300% 100%;
+      box-shadow: 0 0 18px rgba(0, 212, 255, 0.75);
+      animation: neonFlow 4s linear infinite;
+    }
+
+    .session-card::after {
+      content: '';
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      right: -90px;
+      bottom: -110px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.22), transparent 68%);
+      pointer-events: none;
+    }
+
+    .session-card:hover {
+      transform: perspective(900px) rotateX(2deg) translateY(-12px) translateZ(12px);
+      box-shadow:
+        0 28px 55px rgba(0, 0, 0, 0.55),
+        0 0 25px rgba(0, 212, 255, 0.32),
+        0 0 55px rgba(124, 58, 237, 0.20);
+      border-color: rgba(0, 212, 255, 0.85);
+    }
+
+    .session-header,
+    .session-details,
+    .session-actions {
+      position: relative;
+      z-index: 2;
+    }
+
+    .session-title p {
+      text-shadow: 0 0 12px rgba(0, 212, 255, 0.45);
+    }
+
+    .detail-item {
+      background: linear-gradient(145deg, rgba(0, 212, 255, 0.09), rgba(124, 58, 237, 0.08));
+      border: 1px solid rgba(0, 212, 255, 0.18);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22) inset;
+      transition: all 0.25s ease;
+    }
+
+    .detail-item:hover {
+      transform: translateY(-2px);
+      border-color: rgba(0, 212, 255, 0.45);
+      box-shadow: 0 0 18px rgba(0, 212, 255, 0.13);
+    }
+
+    .session-status {
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.18);
+    }
+
+    @keyframes neonFlow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 300% 50%; }
+    }
+
+
+    /* Custom neon palette: every session gets its own visual identity */
+    .session-card {
+      --neon-main: #00d4ff;
+      --neon-secondary: #7c3aed;
+      --neon-glow: rgba(0, 212, 255, .28);
+      --neon-bg1: rgba(8, 20, 48, .96);
+      --neon-bg2: rgba(29, 12, 64, .92);
+      border-color: color-mix(in srgb, var(--neon-main) 48%, transparent);
+      background:
+        radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--neon-secondary) 18%, transparent), transparent 38%),
+        linear-gradient(145deg, var(--neon-bg1), var(--neon-bg2));
+      box-shadow:
+        0 18px 35px rgba(0,0,0,.45),
+        0 0 28px var(--neon-glow),
+        0 0 0 1px color-mix(in srgb, var(--neon-main) 10%, transparent) inset;
+    }
+
+    .session-card::before {
+      background: linear-gradient(90deg, var(--neon-main), var(--neon-secondary), var(--neon-main));
+      box-shadow: 0 0 20px var(--neon-glow);
+    }
+
+    .session-card:hover {
+      border-color: var(--neon-main);
+      box-shadow:
+        0 28px 55px rgba(0,0,0,.55),
+        0 0 30px var(--neon-glow),
+        0 0 65px color-mix(in srgb, var(--neon-secondary) 22%, transparent);
+    }
+
+    .session-card .detail-item {
+      border-color: color-mix(in srgb, var(--neon-main) 22%, transparent);
+      background: linear-gradient(145deg,
+        color-mix(in srgb, var(--neon-main) 10%, transparent),
+        color-mix(in srgb, var(--neon-secondary) 10%, transparent));
+    }
+
+    .session-card .detail-item:hover {
+      border-color: color-mix(in srgb, var(--neon-main) 55%, transparent);
+      box-shadow: 0 0 20px var(--neon-glow);
+    }
+
+    .session-card .session-title p {
+      text-shadow: 0 0 14px var(--neon-glow);
+    }
+
+    /* Palette 1 — Indigo / Purple (Cyan removed) */
+    .session-card.neon-indigo { --neon-main:#6d5dfc; --neon-secondary:#c026ff; --neon-glow:rgba(109,93,252,.30); --neon-bg1:rgba(18,10,55,.96); --neon-bg2:rgba(48,8,65,.92); }
+    /* Palette 2 — Pink / Blue */
+    .session-card.neon-pink { --neon-main:#ff2bd6; --neon-secondary:#4169ff; --neon-glow:rgba(255,43,214,.28); --neon-bg1:rgba(50,7,42,.96); --neon-bg2:rgba(10,20,65,.92); }
+    /* Palette 3 — Lime / Green */
+    .session-card.neon-lime { --neon-main:#b7ff00; --neon-secondary:#00e676; --neon-glow:rgba(183,255,0,.24); --neon-bg1:rgba(20,38,8,.96); --neon-bg2:rgba(4,40,34,.92); }
+    /* Palette 4 — Orange / Magenta */
+    .session-card.neon-orange { --neon-main:#ff8a00; --neon-secondary:#ff1493; --neon-glow:rgba(255,138,0,.27); --neon-bg1:rgba(52,25,4,.96); --neon-bg2:rgba(50,7,37,.92); }
+    /* Palette 5 — Gold / Purple */
+    .session-card.neon-gold { --neon-main:#ffd000; --neon-secondary:#a855f7; --neon-glow:rgba(255,208,0,.25); --neon-bg1:rgba(48,36,4,.96); --neon-bg2:rgba(35,8,58,.92); }
+    /* Palette 6 — Red / Blue */
+    .session-card.neon-red { --neon-main:#ff3158; --neon-secondary:#00a8ff; --neon-glow:rgba(255,49,88,.27); --neon-bg1:rgba(52,8,20,.96); --neon-bg2:rgba(5,25,55,.92); }
+    /* Palette 7 — Turquoise / Purple */
+    .session-card.neon-aqua { --neon-main:#00ffd5; --neon-secondary:#b026ff; --neon-glow:rgba(0,255,213,.26); --neon-bg1:rgba(3,42,42,.96); --neon-bg2:rgba(34,7,58,.92); }
+    /* Palette 8 — White / Electric Blue */
+    .session-card.neon-ice { --neon-main:#f3fbff; --neon-secondary:#008cff; --neon-glow:rgba(0,180,255,.28); --neon-bg1:rgba(12,29,48,.96); --neon-bg2:rgba(5,25,52,.92); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .session-card::before {
+        animation: none;
+      }
+    }
+
+    .session-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
+    .session-title h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--theme-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .session-title p {
+      font-size: 16px;
+      color: var(--theme-accent);
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .session-status {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #10b981;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .session-status i {
+      font-size: 8px;
+      animation: pulse 2s infinite;
+    }
+
+    .session-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .detail-item {
+      background: rgba(0, 212, 255, 0.05);
+      padding: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--theme-border);
+    }
+
+    .detail-item label {
+      font-size: 10px;
+      color: var(--theme-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .detail-item span {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--theme-text);
+    }
+
+    .session-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-small {
+      width: 100%;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-console {
+      background: rgba(0, 212, 255, 0.2);
+      border: 1px solid rgba(0, 212, 255, 0.4);
+      color: var(--theme-accent);
+    }
+
+    .btn-console:hover {
+      background: rgba(0, 212, 255, 0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+    }
+
+    .btn-stop {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #ef4444;
+    }
+
+    .btn-stop:hover {
+      background: rgba(239, 68, 68, 0.3);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--theme-text-secondary);
+    }
+
+    .empty-state i {
+      font-size: 70px;
+      margin-bottom: 25px;
+      opacity: 0.4;
+    }
+
+    .empty-state h3 {
+      font-size: 22px;
+      margin-bottom: 12px;
+      color: var(--theme-text);
+    }
+    
+        /* Help Section */
+    .help-section {
+      display: none;
+    }
+
+    .help-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 25px;
+    }
+
+    .help-card {
+      background: var(--theme-surface);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--theme-border);
+      border-radius: 8px;
+      padding: 35px;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .help-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--theme-accent);
+      box-shadow: 0 15px 40px rgba(0, 212, 255, 0.3);
+    }
+
+    .help-card-icon {
+      width: 70px;
+      height: 70px;
+      background: rgba(0, 212, 255, 0.15);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: var(--theme-accent);
+      margin-bottom: 25px;
+    }
+
+    .help-card h3 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .help-card p {
+      color: var(--theme-text-secondary);
+      line-height: 1.7;
+      margin-bottom: 15px;
+    }
+
+    .help-card ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .help-card ul li {
+      color: var(--theme-text-secondary);
+      padding: 10px 0;
+      padding-left: 30px;
+      position: relative;
+    }
+
+    .help-card ul li:before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--theme-success);
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--theme-surface);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--theme-border);
+      border-radius: 8px;
+      padding: 35px;
+      max-width: 95%;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .modal-header h3 {
+      font-size: 24px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(90deg, var(--theme-accent) 0%, var(--theme-accent-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .modal-close {
+      background: rgba(239, 68, 68, 0.2);
+      border: none;
+      color: #ef4444;
+      font-size: 28px;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .modal-close:hover {
+      background: var(--theme-error);
+      color: white;
+      transform: rotate(90deg);
+    }
+
+    .form-row {
+      margin-bottom: 22px;
+    }
+
+    .form-row label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--theme-text);
+    }
+
+    .form-row input,
+    .form-row select,
+    .form-row textarea {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1.3px solid var(--theme-border);
+      border-radius: 8px;
+      color: var(--theme-text);
+      font-size: 15px;
+      font-family: inherit;
+      transition: all 0.3s ease;
+    }
+
+    .form-row input:focus,
+    .form-row select:focus,
+    .form-row textarea:focus {
+      outline: none;
+      border-color: var(--theme-accent);
+      background: rgba(0, 0, 0, 0.3);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.2);
+    }
+
+    .console-viewer {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--theme-border);
+      border-radius: 8px;
+      padding: 22px;
+      max-height: 450px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+
+    .console-line {
+      padding: 10px;
+      margin-bottom: 6px;
+      border-radius: 6px;
+      background: var(--theme-surface);
+      color: var(--theme-text-secondary);
+      word-break: break-word;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.show {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .footer {
+        margin-left: 0;
+      }
+
+      .footer-content {
+        grid-template-columns: 1fr;
+        gap: 35px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .sessions-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .help-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .server-name span {
+        display: none;
+      }
+
+      .status-bar {
+        padding: 0 15px;
+      }
+
+      .approval-card {
+        padding: 35px 25px;
+        margin: 0 2.5%;
+      }
+
+      .auth-card {
+        padding: 35px 25px;
+      }
+
+      .auth-page {
+        padding: 20px 10px;
+      }
+
+      .session-details {
+        grid-template-columns: 1fr;
+      }
+
+      .session-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-content {
+        padding: 25px 20px;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .approval-card {
+        max-width: 90%;
+        margin: 0 5%;
+      }
+
+      .auth-page {
+        max-width: 90%;
+        margin: 0 5%;
+      }
+
+      .modal-content {
+        max-width: 90%;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .approval-card {
+        max-width: 85%;
+        margin: 0 7.5%;
+      }
+
+      .auth-page {
+        max-width: 85%;
+        margin: 0 7.5%;
+      }
+
+      .modal-content {
+        max-width: 85%;
+      }
+    }
+
+    @media (min-width: 1440px) {
+      .approval-card {
+        max-width: 80%;
+        margin: 0 10%;
+      }
+
+      .auth-page {
+        max-width: 80%;
+        margin: 0 10%;
+      }
+
+      .modal-content {
+        max-width: 80%;
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--theme-primary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--theme-border);
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--theme-accent);
+    }
+  
+    /* FINAL CUSTOM 3D SESSION EFFECT */
+    .session-card {
+      transform-style: preserve-3d;
+      isolation: isolate;
+    }
+
+    .session-card .session-header,
+    .session-card .session-details,
+    .session-card .session-actions {
+      transform: translateZ(18px);
+    }
+
+    .triple-running-3d {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 64px;
+      margin: 16px 0 6px;
+      perspective: 900px;
+      transform-style: preserve-3d;
+    }
+
+    .triple-running-3d .run-copy {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 900;
+      border: 1px solid var(--neon-main);
+      background: linear-gradient(145deg,
+        color-mix(in srgb, var(--neon-main) 35%, transparent),
+        color-mix(in srgb, var(--neon-secondary) 35%, transparent));
+      box-shadow:
+        0 0 14px var(--neon-glow),
+        0 8px 0 color-mix(in srgb, var(--neon-secondary) 55%, #000);
+      transform-style: preserve-3d;
+      animation: teddyTriple3D 1.15s ease-in-out infinite;
+    }
+
+    .triple-running-3d .run-copy:nth-child(2) { animation-delay: .18s; }
+    .triple-running-3d .run-copy:nth-child(3) { animation-delay: .36s; }
+
+    .triple-running-3d .run-label {
+      margin-left: 5px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 1.3px;
+      color: var(--neon-main);
+      text-shadow: 0 0 12px var(--neon-glow);
+      transform: translateZ(15px);
+    }
+
+    @keyframes teddyTriple3D {
+      0%, 100% {
+        transform: translate3d(0, 0, 0) rotateX(14deg) rotateY(-14deg) scale(1);
+      }
+      45% {
+        transform: translate3d(0, -10px, 24px) rotateX(-10deg) rotateY(18deg) scale(1.1);
+      }
+      70% {
+        transform: translate3d(0, 2px, 8px) rotateX(10deg) rotateY(-6deg) scale(1.03);
+      }
+    }
+
+    .session-card.theme-a { --neon-main:#6d5dfc; --neon-secondary:#c026ff; --neon-glow:rgba(109,93,252,.30); }
+    .session-card.theme-b { --neon-main:#ff2bd6; --neon-secondary:#4169ff; --neon-glow:rgba(255,43,214,.28); }
+    .session-card.theme-c { --neon-main:#b7ff00; --neon-secondary:#00e676; --neon-glow:rgba(183,255,0,.24); }
+    .session-card.theme-d { --neon-main:#ff8a00; --neon-secondary:#ff1493; --neon-glow:rgba(255,138,0,.27); }
+    .session-card.theme-e { --neon-main:#ffd000; --neon-secondary:#a855f7; --neon-glow:rgba(255,208,0,.25); }
+    .session-card.theme-f { --neon-main:#ff3158; --neon-secondary:#008cff; --neon-glow:rgba(255,49,88,.27); }
+    .session-card.theme-g { --neon-main:#00ffd5; --neon-secondary:#b026ff; --neon-glow:rgba(0,255,213,.26); }
+    .session-card.theme-h { --neon-main:#f3fbff; --neon-secondary:#008cff; --neon-glow:rgba(0,180,255,.28); }
+
+
+    /* Custom Mention UI — selection/preview only */
+    .custom-mention-panel {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(109,93,252,.42);
+      background: linear-gradient(145deg, rgba(20,12,52,.92), rgba(8,18,42,.92));
+      box-shadow: 0 0 24px rgba(109,93,252,.14);
+      transform: translateZ(12px);
+    }
+    .custom-mention-title {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:12px;
+      font-weight:800;
+      letter-spacing:.4px;
+    }
+    .mention-count {
+      font-size:11px;
+      padding:5px 9px;
+      border-radius:999px;
+      border:1px solid rgba(0,255,213,.35);
+      color:#00ffd5;
+      background:rgba(0,255,213,.07);
+    }
+    .mention-controls {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:12px;
+    }
+    .mention-control-btn {
+      border:1px solid rgba(109,93,252,.45);
+      border-radius:10px;
+      padding:8px 12px;
+      background:rgba(109,93,252,.12);
+      color:#fff;
+      cursor:pointer;
+      transition:.2s ease;
+    }
+    .mention-control-btn:hover {
+      transform:translateY(-2px);
+      box-shadow:0 0 16px rgba(109,93,252,.25);
+    }
+    .mention-list {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+      gap:8px;
+      max-height:220px;
+      overflow:auto;
+      padding-right:3px;
+    }
+    .mention-option {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 10px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.035);
+    }
+    .mention-option input { accent-color:#7c3aed; }
+    .mention-preview {
+      margin-top:12px;
+      min-height:34px;
+      padding:9px 11px;
+      border-radius:10px;
+      border:1px dashed rgba(0,255,213,.28);
+      color:#cfefff;
+      font-size:12px;
+      word-break:break-word;
+    }
+
+
+    /* ALL 3D LIGHT CUSTOM SESSION DESIGN */
+    :root {
+      --page-bg: #eef4ff;
+      --page-surface: rgba(255,255,255,.82);
+      --page-text: #172033;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 12% 10%, rgba(109,93,252,.18), transparent 30%),
+        radial-gradient(circle at 88% 18%, rgba(0,180,255,.15), transparent 28%),
+        linear-gradient(135deg, #f7fbff 0%, #edf2ff 48%, #f8f4ff 100%) !important;
+      color: var(--page-text);
+    }
+
+    .dashboard,
+    .dashboard-header,
+    .help-section,
+    .stat-card,
+    .modal-content {
+      background: rgba(255,255,255,.72) !important;
+      color: var(--page-text);
+      box-shadow:
+        0 18px 40px rgba(57,72,112,.16),
+        0 2px 0 rgba(255,255,255,.95) inset,
+        0 0 30px rgba(109,93,252,.08);
+    }
+
+    .neon-sessions-stage {
+      perspective: 1400px;
+      transform-style: preserve-3d;
+    }
+
+    .neon-sessions-stage .sessions-grid {
+      perspective: 1400px;
+      transform-style: preserve-3d;
+    }
+
+    .session-card {
+      color: #182238 !important;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.96), rgba(241,246,255,.90)) !important;
+      border: 1px solid rgba(109,93,252,.28) !important;
+      border-radius: 22px !important;
+      transform-style: preserve-3d;
+      box-shadow:
+        0 24px 45px rgba(42,57,100,.18),
+        0 7px 0 rgba(109,93,252,.10),
+        0 0 28px var(--neon-glow);
+    }
+
+    .session-card:hover {
+      transform: perspective(1200px) rotateX(4deg) rotateY(-2deg) translateY(-12px) translateZ(18px) !important;
+    }
+
+    .session-card .session-header,
+    .session-card .session-details,
+    .session-card .session-actions {
+      transform: translateZ(22px);
+    }
+
+    .session-title h3,
+    .session-title p,
+    .detail-item label,
+    .detail-item span {
+      color: #182238;
+    }
+
+    .session-status {
+      transform: translateZ(30px);
+      box-shadow: 0 7px 0 rgba(16,185,129,.10), 0 0 18px rgba(16,185,129,.22);
+    }
+
+    .session-details {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px !important;
+    }
+
+    .detail-item {
+      min-height: 68px;
+      border-radius: 15px !important;
+      background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(235,242,255,.90)) !important;
+      border: 1px solid rgba(109,93,252,.20) !important;
+      box-shadow:
+        0 9px 16px rgba(40,56,96,.12),
+        0 2px 0 rgba(255,255,255,.95) inset;
+      transform: translateZ(16px);
+    }
+
+    /* Four editable session values */
+    .custom-session-fields {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin-top:14px;
+      transform:translateZ(20px);
+    }
+
+    .custom-session-field {
+      padding:11px 12px;
+      border-radius:13px;
+      background:linear-gradient(145deg,#fff,#edf3ff);
+      border:1px solid rgba(109,93,252,.22);
+      box-shadow:0 8px 15px rgba(48,65,108,.10);
+    }
+
+    .custom-session-field small {
+      display:block;
+      font-size:10px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.8px;
+      opacity:.65;
+      margin-bottom:4px;
+    }
+
+    .custom-session-field strong {
+      display:block;
+      font-size:13px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    
+        .session-edit-btn {
+      width:100%;
+      margin-top:12px;
+      border:1px solid rgba(109,93,252,.38);
+      border-radius:12px;
+      padding:10px 13px;
+      cursor:pointer;
+      font-weight:800;
+      color:#fff;
+      background:linear-gradient(135deg,#6d5dfc,#c026ff);
+      box-shadow:0 8px 0 rgba(83,55,170,.20),0 0 18px rgba(109,93,252,.20);
+      transform:translateZ(25px);
+      transition:.2s ease;
+    }
+
+    .session-edit-btn:hover {
+      transform:translateZ(30px) translateY(-2px);
+      box-shadow:0 11px 0 rgba(83,55,170,.18),0 0 25px rgba(109,93,252,.28);
+    }
+
+    .session-edit-modal {
+      position:fixed;
+      inset:0;
+      z-index:99999;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(238,244,255,.68);
+      backdrop-filter:blur(10px);
+    }
+
+    .session-edit-modal.active { display:flex; }
+
+    .session-edit-box {
+      width:min(520px,100%);
+      padding:24px;
+      border-radius:24px;
+      background:linear-gradient(145deg,#fff,#edf3ff);
+      border:1px solid rgba(109,93,252,.28);
+      box-shadow:0 35px 70px rgba(37,49,90,.25),0 0 40px rgba(109,93,252,.15);
+      transform:perspective(900px) rotateX(2deg);
+    }
+
+    .session-edit-box h3 {
+      margin:0 0 18px;
+      color:#182238;
+    }
+
+    .session-edit-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .session-edit-grid label {
+      display:block;
+      font-size:11px;
+      font-weight:800;
+      margin-bottom:6px;
+      color:#45516c;
+    }
+
+    .session-edit-grid input {
+      width:100%;
+      box-sizing:border-box;
+      padding:11px 12px;
+      border-radius:11px;
+      border:1px solid rgba(109,93,252,.25);
+      background:#fff;
+      color:#182238;
+      outline:none;
+    }
+
+    .session-edit-grid input:focus {
+      border-color:#6d5dfc;
+      box-shadow:0 0 15px rgba(109,93,252,.18);
+    }
+
+    .session-edit-actions {
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      margin-top:18px;
+    }
+
+    .session-edit-actions button {
+      border:0;
+      border-radius:11px;
+      padding:10px 15px;
+      cursor:pointer;
+      font-weight:800;
+    }
+
+    .session-edit-save {
+      color:#fff;
+      background:linear-gradient(135deg,#6d5dfc,#c026ff);
+    }
+
+    .session-edit-cancel {
+      background:#e7ecf7;
+      color:#27334b;
+    }
+
+    @media (max-width:600px) {
+      .session-details,
+      .custom-session-fields,
+      .session-edit-grid {
+        grid-template-columns:1fr !important;
+      }
+    }
+
+
+    /* FINAL DARK 3D OVERRIDE */
+    :root {
+      --page-bg:#050712;
+      --page-surface:rgba(12,16,32,.86);
+      --page-text:#eef4ff;
+    }
+
+    html, body {
+      background:#050712 !important;
+      color:#eef4ff !important;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 12% 8%, rgba(109,93,252,.18), transparent 28%),
+        radial-gradient(circle at 88% 14%, rgba(0,255,213,.10), transparent 25%),
+        radial-gradient(circle at 50% 90%, rgba(192,38,255,.09), transparent 32%),
+        linear-gradient(135deg,#03040b 0%,#080b18 50%,#050712 100%) !important;
+      background-attachment:fixed !important;
+    }
+
+    .dashboard,
+    .dashboard-header,
+    .help-section,
+    .stat-card,
+    .modal-content {
+      background:rgba(8,11,24,.78) !important;
+      color:#eef4ff !important;
+      border-color:rgba(109,93,252,.25) !important;
+      box-shadow:0 18px 45px rgba(0,0,0,.48),0 0 30px rgba(109,93,252,.08);
+    }
+
+    .session-card {
+      background:
+        radial-gradient(circle at 100% 0%, color-mix(in srgb,var(--neon-secondary) 15%,transparent),transparent 38%),
+        linear-gradient(145deg,rgba(15,19,39,.98),rgba(5,8,20,.96)) !important;
+      color:#eef4ff !important;
+      border-color:color-mix(in srgb,var(--neon-main) 42%,transparent) !important;
+      box-shadow:
+        0 25px 50px rgba(0,0,0,.58),
+        0 0 30px var(--neon-glow),
+        0 0 0 1px rgba(255,255,255,.035) inset;
+      transform-style:preserve-3d !important;
+    }
+
+    .session-card .session-title h3,
+    .session-card .session-title p,
+    .session-card .detail-item label,
+    .session-card .detail-item span {
+      color:#eef4ff !important;
+    }
+
+    .detail-item,
+    .custom-session-field {
+      background:linear-gradient(145deg,rgba(24,29,53,.96),rgba(8,12,28,.96)) !important;
+      color:#eef4ff !important;
+      border-color:color-mix(in srgb,var(--neon-main) 25%,transparent) !important;
+      box-shadow:0 10px 20px rgba(0,0,0,.34),0 2px 0 rgba(255,255,255,.035) inset;
+    }
+
+    .custom-session-field small { color:#aeb9d5 !important; }
+    .custom-session-field strong { color:#fff !important; }
+
+    .session-edit-modal {
+      background:rgba(0,0,0,.72) !important;
+    }
+
+    .session-edit-box {
+      background:linear-gradient(145deg,#11162b,#070a17) !important;
+      color:#eef4ff !important;
+      border-color:rgba(109,93,252,.42) !important;
+      box-shadow:0 35px 80px rgba(0,0,0,.7),0 0 45px rgba(109,93,252,.16);
+      transform:perspective(1000px) rotateX(3deg) translateZ(20px);
+    }
+
+    .session-edit-box h3,
+    .session-edit-grid label {
+      color:#eef4ff !important;
+    }
+
+    .session-edit-grid input {
+      background:#080c1b !important;
+      color:#fff !important;
+      border-color:rgba(109,93,252,.38) !important;
+    }
+
+    .session-edit-cancel {
+      background:#202740 !important;
+      color:#fff !important;
+    }
+
+    /* Extra 3D perspective on the complete sessions area */
+    #sessionsContainer,
+    .neon-sessions-stage,
+    .neon-sessions-stage .sessions-grid {
+      transform-style:preserve-3d !important;
+      perspective:1500px !important;
+    }
+
+    .session-card > * {
+      position:relative;
+      z-index:2;
+    }
+
+</style>
+</head>
+<body data-theme="dark">
+  <!-- Approval Page -->
+  <div id="approvalPage" class="approval-page">
+    <div class="approval-card">
+      <div class="approval-header">
+        <div class="aman-down-logo" aria-label="Aman Down">
+          <div class="teddy-icon"><i class="fab fa-whatsapp"></i></div>
+          <div class="brand-text">AMAN DOWN</div>
+        </div>
+        <i class="fab fa-whatsapp"></i>
+        <h1>Aman Down Offline WhatsApp Server </h1>
+        <p>Approval Required to Access</p>
+      </div>
+
+      <div class="approval-key-display">
+        <label>Your Unique Approval Key</label>
+        <div class="key" id="approvalKeyDisplay">Generating...</div>
+      </div>
+
+      <div class="approval-status" id="approvalStatus">
+        <i class="fas fa-clock"></i>
+        <span>Waiting for approval...</span>
+      </div>
+
+      <div class="approval-actions">
+        <button class="btn btn-primary" id="checkApprovalBtn">
+          <span class="spinner"></span>
+          <i class="fas fa-check-circle"></i>
+          <span>Check Approval Status</span>
+        </button>
+        <button class="btn btn-whatsapp" id="sendApprovalBtn">
+          <i class="fab fa-whatsapp"></i>
+          <span>Send Approval Request</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="status-bar" style="display: none;" id="statusBar">
+    <div class="status-bar-left">
+      <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="server-name">
+        <i class="fab fa-whatsapp"></i>
+        <span>Aman Down Offline Whatsapp Server</span>
+      </div>
+    </div>
+    <div class="status-bar-right">
+      <button class="theme-switcher" id="themeSwitcher">
+        <i class="fas fa-moon"></i>
+        <span id="currentTheme">Dark Theme</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar hidden" id="sidebar" style="display: none;">
+    <div class="sidebar-header">
+      <h3 id="sidebarUserRole">Navigation</h3>
+    </div>
+    <ul class="sidebar-menu" id="sidebarMenu">
+      <!-- Menu items will be added dynamically -->
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content expanded" id="mainContent" style="display: none;">
+    <!-- Login Page -->
+    <div class="auth-page" id="loginPage">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2>Login to Dashboard</h2>
+          <p>Enter your credentials to continue</p>
+        </div>
+
+        <div id="loginError" class="error-msg"></div>
+        <div id="loginSuccess" class="success-msg"></div>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> Username</label>
+            <input type="text" id="loginUsername" placeholder="Enter username" required>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-lock"></i> Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <span class="spinner"></span>
+            <i class="fas fa-sign-in-alt"></i>
+            <span>Login</span>
+          </button>
+        </form>
+
+        <div class="auth-switch">
+          Don't have an account? <a id="showSignup">Sign up here</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Signup Page -->
+    <div class="auth-page" id="signupPage" style="display: none;">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2>Create Account</h2>
+          <p>Join Aman WhatsApp Server</p>
+        </div>
+
+        <div id="signupError" class="error-msg"></div>
+        <div id="signupSuccess" class="success-msg"></div>
+
+        <form id="signupForm">
+          <div class="form-group">
+            <label><i class="fas fa-user"></i> Username</label>
+            <input type="text" id="signupUsername" placeholder="Choose username (min 3 chars)" required>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-lock"></i> Password</label>
+            <input type="password" id="signupPassword" placeholder="Choose password (min 6 chars)" required>
+          </div>
+          <button type="submit" class="btn btn-success">
+            <span class="spinner"></span>
+            <i class="fas fa-user-plus"></i>
+            <span>Create Account</span>
+          </button>
+        </form>
+
+        <div class="auth-switch">
+          Already have an account? <a id="showLogin">Login here</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+      <div class="dashboard-header">
+        <div class="dashboard-title">
+          <span id="welcomeText">Dashboard</span>
+          <span class="user-badge" id="userBadge">
+            <i class="fas fa-user"></i>
+            <span id="badgeText">USER</span>
+          </span>
+        </div>
+        <div class="dashboard-subtitle" id="userRoleText">User Dashboard</div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Aman Down Offline WhatsApp Server Uptime</span>
+              <div class="stat-card-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+            </div>
+            <div class="stat-card-value" id="serverUptime">Loading...</div>
+            <div class="stat-card-change">
+              <i class="fas fa-check-circle"></i>
+              <span>Server Running</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Total Sessions</span>
+              <div class="stat-card-icon">
+                <i class="fas fa-server"></i>
+              </div>
+            </div>
+            <div class="stat-card-value" id="totalSessions">0</div>
+            <div class="stat-card-change">
+              <i class="fas fa-arrow-up"></i>
+              <span>Active Sessions</span>
+            </div>
+          </div>
+
+          <div class="stat-card" id="totalUsersCard" style="display: none;">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Total Users</span>
+              <div class="stat-card-icon">
+                <i class="fas fa-users"></i>
+              </div>
+            </div>
+            <div class="stat-card-value" id="totalUsers">0</div>
+            <div class="stat-card-change">
+              <i class="fas fa-user-check"></i>
+              <span>Registered Users</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-actions">
+          <button class="btn btn-primary" id="createSessionBtn">
+            <i class="fas fa-plus"></i> New Session
+          </button>
+        <button class="btn btn-primary" id="groupUidBtn" type="button">
+          <i class="fas fa-users"></i> Get Group UID
+        </button>
+        
+          <button class="btn btn-primary" id="refreshBtn">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+        </div>
+      </div>
+
+      <div id="sessionsContainer" class="neon-sessions-stage">
+        <div class="empty-state">
+          <i class="fas fa-spinner fa-spin"></i>
+          <h3>Loading sessions...</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="help-section" id="helpSection">
+      <div class="dashboard-header">
+        <div class="dashboard-title">
+          <i class="fas fa-question-circle"></i>
+          <span>Help & Documentation</span>
+        </div>
+        <div class="dashboard-subtitle">Learn about Offline WhatsApp Server</div>
+      </div>
+
+      <div class="help-grid">
+        <div class="help-card">
+          <div class="help-card-icon">
+            <i class="fas fa-rocket"></i>
+          </div>
+          <h3>Getting Started</h3>
+          <p>Aman Down Offline WhatsApp Server is a powerful automation platform for managing WhatsApp messaging at scale.</p>
+          <ul>
+            <li>Get your approval key approved</li>
+            <li>Create an account or login</li>
+            <li>Upload your WhatsApp creds.json</li>
+            <li>Start sending automated messages</li>
+          </ul>
+        </div>
+
+        <div class="help-card">
+          <div class="help-card-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h3>Security Features</h3>
+          <p>Your security is our priority. The server includes advanced protection mechanisms.</p>
+          <ul>
+            <li>Approval-based access control</li>
+            <li>Browser-based unique keys</li>
+            <li>Encrypted credentials storage</li>
+            <li>Session isolation</li>
+          </ul>
+        </div>
+
+        <div class="help-card">
+          <div class="help-card-icon">
+            <i class="fas fa-cogs"></i>
+          </div>
+          <h3>Advanced Features</h3>
+          <p>Powerful automation capabilities for your WhatsApp workflows.</p>
+          <ul>
+            <li>Multiple session management</li>
+            <li>Automatic reconnection</li>
+            <li>Message scheduling</li>
+            <li>Real-time console logs</li>
+          </ul>
+        </div>
+
+        <div class="help-card">
+          <div class="help-card-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3>Performance</h3>
+          <p>Built for reliability and high performance at scale.</p>
+          <ul>
+            <li>24/7 server uptime</li>
+            <li>Auto session recovery</li>
+            <li>Optimized message delivery</li>
+            <li>Real-time status monitoring</li>
+          </ul>
+        </div>
+
+        <div class="help-card">
+          <div class="help-card-icon">
+            <i class="fas fa-life-ring"></i>
+          </div>
+          <h3>Support</h3>
+          <p>Need help? We're here to assist you.</p>
+          <ul>
+            <li>WhatsApp: +916387071869</li>
+            <li>24/7 Technical Support</li>
+            <li>Documentation Available</li>
+            <li>Community Forum</li>
+          </ul>
+        </div>
+
+        <div class="help-card">
+          <div class="help-card-icon">
+            <i class="fas fa-code"></i>
+          </div>
+          <h3>Technical Details</h3>
+          <p>Built with modern technologies for maximum reliability.</p>
+          <ul>
+            <li>Node.js + Express Backend</li>
+            <li>Baileys WhatsApp Library</li>
+            <li>Multi-file Auth State</li>
+            <li>Real-time WebSocket Support</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer expanded" id="footer" style="display: none;">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>Aman Down WhatsApp Server</h4>
+        <p>Professional WhatsApp automation and management platform. Send messages at scale with advanced features and 24/7 uptime.</p>
+        <div class="social-icons">
+          <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          <a href="https://wa.me/+919517013593" title="WhatsApp" target="_blank"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <ul class="footer-links">
+          <li><a href="#privacy-policy">Privacy Policy</a></li>
+          <li><a href="#terms-conditions">Terms & Conditions</a></li>
+          <li><a href="#contact">Contact Us</a></li>
+          <li><a href="#about">About Us</a></li>
+        </ul>
+      </div>
+      
+      <div class="footer-section">
+        <h4>Support</h4>
+        <ul class="footer-links">
+          <li><a href="#documentation">Documentation</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="#support">Technical Support</a></li>
+          <li><a href="https://wa.me/+919517013593" target="_blank">WhatsApp Support</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 Aman Offline WhatsApp Server. All rights reserved. | Powered by Advanced Automation Technology</p>
+    </div>
+  </div>
+
+
+  <!-- Group UID Lookup Modal -->
+  <div id="groupUidModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-users"></i> Get Group UID</h3>
+        <button class="modal-close" id="closeGroupUidModal">&times;</button>
+      </div>
+
+      <div id="groupUidError" class="error-msg"></div>
+      <div id="groupUidSuccess" class="success-msg"></div>
+
+      <div class="form-row">
+        <label><i class="fas fa-file-code"></i> creds.json</label>
+        <input type="file" id="groupUidCreds" accept=".json" required>
+      </div>
+
+      <button type="button" class="btn btn-primary" id="getGroupUidBtn">
+        <span class="spinner"></span>
+        <i class="fas fa-search"></i>
+        <span>Get Group UID</span>
+      </button>
+
+      <div id="groupUidResults" style="margin-top:20px;"></div>
+    </div>
+  </div>
+
+  <!-- Create Session Modal -->
+  <div id="createSessionModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-server"></i> Create New Session</h3>
+        <button class="modal-close" id="closeCreateModal">&times;</button>
+      </div>
+
+      <div id="createSessionError" class="error-msg"></div>
+
+      <form id="createSessionForm" enctype="multipart/form-data">
+        <div class="form-row">
+          <label><i class="fas fa-signature"></i> Haters Name</label>
+          <input type="text" name="name" placeholder="Enter Hatersname" required>
+        </div>
+
+        <div class="form-row">
+          <label><i class="fas fa-list"></i> Target Type</label>
+          <select name="type" required>
+            <option value="">Select type</option>
+            <option value="contact">Contact</option>
+            <option value="gc">Group</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <label><i class="fas fa-hashtag"></i> Target ID / Number</label>
+          <input type="text" name="targetID" placeholder="e.g., 91951701**** or group ID" required>
+        </div>
+
+        <div class="form-row">
+          <label><i class="fas fa-hourglass-half"></i> Delay (seconds)</label>
+          <input type="number" name="delayTime" min="1" value="5" required>
+        </div>
+
+        <div class="form-row">
+          <label><i class="fas fa-file-code"></i> creds.json</label>
+          <input type="file" name="creds" accept=".json" required>
+        </div>
+
+        <div class="form-row">
+          <label><i class="fas fa-file-alt"></i> message.txt</label>
+          <input type="file" name="messageFile" accept=".txt" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <span class="spinner"></span>
+          <i class="fas fa-rocket"></i>
+          <span>Start Session</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Console Modal -->
+  <div id="consoleModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-terminal"></i> Session Console</h3>
+        <button class="modal-close" id="closeConsoleModal">&times;</button>
+      </div>
+
+      <div class="console-viewer" id="consoleViewer">
+        <div class="console-line">Loading logs...</div>
+      </div>
+
+      <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr; gap: 12px;">
+        <button class="btn btn-primary" id="refreshConsole">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // App State
+    let currentUser = {
+      username: null,
+      role: null,
+      approvalKey: null
+    };
+
+    let currentConsoleSessionId = null;
+    let consoleInterval = null;
+    let sidebarOpen = false;
+
+    // Generate or retrieve approval key
+    async function initializeApprovalKey() {
+      let approvalKey = localStorage.getItem('approvalKey');
+      
+      if (!approvalKey) {
+        try {
+          const fingerprint = {
+            userAgent: navigator.userAgent,
+            language: navigator.language,
+            platform: navigator.platform,
+            screenResolution: `${screen.width}x${screen.height}`,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+          };
+
+          const response = await fetch('/api/generate-approval-key', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(fingerprint)
+          });
+
+          const data = await response.json();
+          
+          if (data.ok) {
+            approvalKey = data.approvalKey;
+            localStorage.setItem('approvalKey', approvalKey);
+          }
+        } catch (e) {
+          console.error('Failed to generate approval key:', e);
+        }
+      }
+
+      document.getElementById('approvalKeyDisplay').textContent = approvalKey || 'ERROR';
+      return approvalKey;
+    }
+
+    // Check approval status
+    async function checkApprovalStatus() {
+      const approvalKey = localStorage.getItem('approvalKey');
+      const btn = document.getElementById('checkApprovalBtn');
+      const statusDiv = document.getElementById('approvalStatus');
+
+      if (!approvalKey) {
+        statusDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>No approval key found</span>';
+        return;
+      }
+
+      btn.classList.add('loading');
+
+      try {
+        const response = await fetch('/api/check-approval', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ approvalKey })
+        });
+
+        const data = await response.json();
+
+        if (data.ok && data.approved) {
+          statusDiv.classList.add('approved');
+          statusDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>✅ Your key is approved! Proceeding to login...</span>';
+          
+          setTimeout(() => {
+            showLoginPage();
+          }, 1500);
+        } else {
+          statusDiv.classList.remove('approved');
+          statusDiv.innerHTML = '<i class="fas fa-clock"></i><span>⏳ Waiting for approval... Please send request to admin.</span>';
+        }
+      } catch (e) {
+        statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Error checking status</span>';
+      } finally {
+        btn.classList.remove('loading');
+      }
+    }
+
+    // Send approval request via WhatsApp
+    function sendApprovalRequest() {
+      const approvalKey = localStorage.getItem('approvalKey');
+      
+      if (!approvalKey) {
+        alert('No approval key found!');
+        return;
+      }
+
+      const message = `Hello Aman Down Sir please approve my key ${approvalKey}`;
+      const whatsappUrl = `https://wa.me/919517013593?text=${encodeURIComponent(message)}`;
+      
+      window.open(whatsappUrl, '_blank');
+    }
+
+    // Show login page
+    function showLoginPage() {
+      document.getElementById('approvalPage').style.display = 'none';
+      document.getElementById('statusBar').style.display = 'flex';
+      document.getElementById('sidebar').style.display = 'block';
+      document.getElementById('mainContent').style.display = 'block';
+      document.getElementById('footer').style.display = 'block';
+      document.getElementById('loginPage').style.display = 'block';
+      
+      currentUser.approvalKey = localStorage.getItem('approvalKey');
+    }
+
+    // Theme Switcher (Dark/Light only)
+    let isDarkTheme = true;
+
+    function switchTheme() {
+      isDarkTheme = !isDarkTheme;
+      const theme = isDarkTheme ? 'dark' : 'light';
+      
+      document.body.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      
+      const themeIcon = document.querySelector('#themeSwitcher i');
+      const themeText = document.getElementById('currentTheme');
+      
+      if (isDarkTheme) {
+        themeIcon.className = 'fas fa-moon';
+        themeText.textContent = 'Dark Theme';
+      } else {
+        themeIcon.className = 'fas fa-sun';
+        themeText.textContent = 'Light Theme';
+      }
+    }
+
+    // Initialize saved theme
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    isDarkTheme = (savedTheme === 'dark');
+    document.body.setAttribute('data-theme', savedTheme);
+    if (!isDarkTheme) {
+      document.querySelector('#themeSwitcher i').className = 'fas fa-sun';
+      document.getElementById('currentTheme').textContent = 'Light Theme';
+    }
+
+    document.getElementById('themeSwitcher').addEventListener('click', switchTheme);
+
+    // Sidebar Toggle with auto-close on mobile
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const footer = document.getElementById('footer');
+      
+      sidebarOpen = !sidebarOpen;
+      
+      if (sidebarOpen) {
+        sidebar.classList.remove('hidden');
+        if (window.innerWidth > 768) {
+          mainContent.classList.remove('expanded');
+          footer.classList.remove('expanded');
+        } else {
+          sidebar.classList.add('show');
+        }
+      } else {
+        sidebar.classList.add('hidden');
+        sidebar.classList.remove('show');
+        mainContent.classList.add('expanded');
+        footer.classList.add('expanded');
+      }
+    });
+
+    // Approval Page Events
+    document.getElementById('checkApprovalBtn').addEventListener('click', checkApprovalStatus);
+    document.getElementById('sendApprovalBtn').addEventListener('click', sendApprovalRequest);
+
+    // Auth Navigation
+    document.getElementById('showSignup').addEventListener('click', () => {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('signupPage').style.display = 'block';
+    });
+
+    document.getElementById('showLogin').addEventListener('click', () => {
+      document.getElementById('signupPage').style.display = 'none';
+      document.getElementById('loginPage').style.display = 'block';
+    });
+
+    // Login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('.btn');
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+      const approvalKey = localStorage.getItem('approvalKey');
+      const errorDiv = document.getElementById('loginError');
+
+      errorDiv.style.display = 'none';
+      btn.classList.add('loading');
+
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, approvalKey })
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+          currentUser.username = data.username;
+          currentUser.role = data.role;
+          localStorage.setItem('username', data.username);
+          localStorage.setItem('role', data.role);
+          
+          initDashboard();
+        } else {
+          errorDiv.textContent = data.error || 'Login failed';
+          errorDiv.style.display = 'block';
+        }
+      } catch (error) {
+        errorDiv.textContent = 'Connection error. Please try again.';
+        errorDiv.style.display = 'block';
+      } finally {
+        btn.classList.remove('loading');
+      }
+    });
+
+    // Signup
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('.btn');
+      const username = document.getElementById('signupUsername').value;
+      const password = document.getElementById('signupPassword').value;
+      const approvalKey = localStorage.getItem('approvalKey');
+      const errorDiv = document.getElementById('signupError');
+      const successDiv = document.getElementById('signupSuccess');
+
+      errorDiv.style.display = 'none';
+      successDiv.style.display = 'none';
+      btn.classList.add('loading');
+
+      try {
+        const response = await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, approvalKey })
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+          successDiv.textContent = 'Account created successfully! Redirecting to login...';
+          successDiv.style.display = 'block';
+          
+          setTimeout(() => {
+            document.getElementById('signupPage').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'block';
+            document.getElementById('loginUsername').value = username;
+          }, 1500);
+        } else {
+          errorDiv.textContent = data.error || 'Signup failed';
+          errorDiv.style.display = 'block';
+        }
+      } catch (error) {
+        errorDiv.textContent = 'Connection error. Please try again.';
+        errorDiv.style.display = 'block';
+      } finally {
+        btn.classList.remove('loading');
+      }
+    });
+
+    // Initialize Dashboard
+    function initDashboard() {
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('signupPage').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      
+      // Update welcome text and badge
+      document.getElementById('welcomeText').textContent = currentUser.username;
+      const badge = document.getElementById('userBadge');
+      const badgeText = document.getElementById('badgeText');
+      
+      if (currentUser.role === 'admin') {
+        badge.classList.remove('user');
+        badge.classList.add('admin');
+        badgeText.textContent = 'ADMIN';
+        badge.querySelector('i').className = 'fas fa-crown';
+        document.getElementById('userRoleText').textContent = 'Administrator Dashboard';
+      } else {
+        badge.classList.remove('admin');
+        badge.classList.add('user');
+        badgeText.textContent = 'USER';
+        badge.querySelector('i').className = 'fas fa-user';
+        document.getElementById('userRoleText').textContent = 'User Dashboard';
+      }
+      
+      updateSidebar();
+      loadSessions();
+      startServerUptimeUpdate();
+      
+      if (currentUser.role === 'admin') {
+        document.getElementById('totalUsersCard').style.display = 'block';
+        loadTotalUsers();
+      }
+    }
+
+    // Update Sidebar Menu
+    function updateSidebar() {
+      const menu = document.getElementById('sidebarMenu');
+      document.getElementById('sidebarUserRole').textContent = currentUser.role === 'admin' ? 'Admin Menu' : 'User Menu';
+      
+      let menuItems = [];
+      
+      if (currentUser.role === 'admin') {
+        menuItems = [
+          { icon: 'fa-home', text: 'Dashboard', page: 'dashboard' },
+          { icon: 'fa-question-circle', text: 'Help', page: 'help' },
+          { icon: 'fa-sign-out-alt', text: 'Logout', action: 'logout' }
+        ];
+      } else {
+        menuItems = [
+          { icon: 'fa-home', text: 'Dashboard', page: 'dashboard' },
+          { icon: 'fa-question-circle', text: 'Help', page: 'help' },
+          { icon: 'fa-sign-out-alt', text: 'Logout', action: 'logout' }
+        ];
+      }
+      
+      menu.innerHTML = menuItems.map(item => `
+        <li>
+          <a data-page="${item.page || ''}" data-action="${item.action || ''}">
+            <i class="fas ${item.icon}"></i>
+            <span>${item.text}</span>
+          </a>
+        </li>
+      `).join('');
+      
+      menu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', (e) => {
+          const action = e.currentTarget.getAttribute('data-action');
+          const page = e.currentTarget.getAttribute('data-page');
+          
+          if (action === 'logout') {
+            logout();
+          } else if (page === 'dashboard') {
+            showDashboard();
+          } else if (page === 'help') {
+            showHelp();
+          }
+          
+          // Update active state
+          menu.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+          e.currentTarget.classList.add('active');
+          
+          // Auto-close sidebar on mobile
+          if (window.innerWidth <= 768) {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.add('hidden');
+            sidebar.classList.remove('show');
+            sidebarOpen = false;
+          }
+        });
+      });
+      
+      menu.querySelector('a').classList.add('active');
+    }
+
+    // Show Dashboard
+    function showDashboard() {
+      document.getElementById('dashboard').style.display = 'block';
+      document.getElementById('helpSection').style.display = 'none';
+      loadSessions();
+    }
+
+    // Show Help
+    function showHelp() {
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('helpSection').style.display = 'block';
+    }
+
+    // Logout
+    function logout() {
+      if (!confirm('Are you sure you want to logout?')) return;
+      
+      currentUser = { username: null, role: null, approvalKey: null };
+      localStorage.removeItem('username');
+      localStorage.removeItem('role');
+      
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('helpSection').style.display = 'none';
+      document.getElementById('loginPage').style.display = 'block';
+      
+      sidebarOpen = false;
+      document.getElementById('sidebar').classList.add('hidden');
+      document.getElementById('mainContent').classList.add('expanded');
+      document.getElementById('footer').classList.add('expanded');
+      
+      if (consoleInterval) {
+        clearInterval(consoleInterval);
+        consoleInterval = null;
+      }
+    }
+
+    // Server Uptime
+    function startServerUptimeUpdate() {
+      updateServerUptime();
+      setInterval(updateServerUptime, 1000);
+    }
+
+    async function updateServerUptime() {
+      try {
+        const response = await fetch('/api/uptime');
+        const data = await response.json();
+        if (data.ok) {
+          document.getElementById('serverUptime').textContent = data.uptimeFormatted;
+        }
+      } catch (error) {
+        console.error('Failed to fetch uptime:', error);
+      }
+    }
+
+    // Load Total Users (Admin only)
+    async function loadTotalUsers() {
+      try {
+        const response = await fetch('/api/total-users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: currentUser.role })
+        });
+
+        const data = await response.json();
+        if (data.ok) {
+          document.getElementById('totalUsers').textContent = data.totalUsers;
+        }
+      } catch (error) {
+        console.error('Failed to load total users:', error);
+      }
+    }
+
+    // Load Sessions
+    async function loadSessions() {
+      const container = document.getElementById('sessionsContainer');
+      
+      try {
+        const response = await fetch('/api/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            username: currentUser.username, 
+            role: currentUser.role 
+          })
+        });
+
+        const data = await response.json();
+        
+        document.getElementById('totalSessions').textContent = data.sessions?.length || 0;
+
+        if (data.ok && data.sessions.length > 0) {
+          const grid = document.createElement('div');
+          grid.className = 'sessions-grid';
+
+          data.sessions.forEach(session => {
+            const card = createSessionCard(session);
+            grid.appendChild(card);
+          });
+
+          container.innerHTML = '';
+          container.appendChild(grid);
+        } else {
+          container.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <h3>No sessions found</h3>
+              <p>Create your first automation session</p>
+            </div>
+          `;
+        }
+      } catch (error) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Error loading sessions</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Create Session Card
+    function createSessionCard(session) {
+      const card = document.createElement('div');
+      card.className = 'session-card';
+      
+      const createdDate = new Date(session.createdAt).toLocaleString();
+      
+      card.innerHTML = `
+        <div class="session-header">
+          <div class="session-title">
+            <h3>${session.prefixName || 'Bot'}</h3>
+            <p>${session.sessionId}</p>
+          </div>
+          <div class="session-status">
+            <i class="fas fa-circle"></i>
+            Running
+          </div>
+        </div>
+
+        <div class="session-details">
+          <div class="detail-item">
+            <label><i class="fas fa-clock"></i> Uptime</label>
+            <span>${session.uptime}</span>
+          </div>
+          <div class="detail-item">
+            <label><i class="fas fa-hourglass-half"></i> Delay</label>
+            <span>${session.delayMs / 1000}s</span>
+          </div>
+          <div class="detail-item">
+            <label><i class="fas fa-calendar"></i> Created</label>
+            <span>${createdDate}</span>
+          </div>
+          <div class="detail-item">
+            <label><i class="fas fa-user"></i> User</label>
+            <span>${session.username}</span>
+          </div>
+        </div>
+
+        <div class="session-actions">
+          <button class="btn-small btn-console" data-session-id="${session.sessionId}">
+            <i class="fas fa-terminal"></i> Console
+          </button>
+          <button class="btn-small btn-stop" data-session-id="${session.sessionId}">
+            <i class="fas fa-stop"></i> Stop
+          </button>
+        </div>
+      `;
+
+      card.querySelector('.btn-console').addEventListener('click', () => {
+        openConsole(session.sessionId);
+      });
+
+      card.querySelector('.btn-stop').addEventListener('click', () => {
+        stopSession(session.sessionId);
+      });
+
+      return card;
+    }
+
+    // Refresh Sessions
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+      loadSessions();
+    });
+
+
+    // ================= GROUP UID LOOKUP =================
+    const groupUidModal = document.getElementById('groupUidModal');
+    const groupUidBtn = document.getElementById('groupUidBtn');
+    const closeGroupUidModal = document.getElementById('closeGroupUidModal');
+    const getGroupUidBtn = document.getElementById('getGroupUidBtn');
+    const groupUidCreds = document.getElementById('groupUidCreds');
+    const groupUidResults = document.getElementById('groupUidResults');
+    const groupUidError = document.getElementById('groupUidError');
+    const groupUidSuccess = document.getElementById('groupUidSuccess');
+
+    if (groupUidBtn) {
+      groupUidBtn.addEventListener('click', () => {
+        groupUidModal.classList.add('show');
+        groupUidError.style.display = 'none';
+        groupUidSuccess.style.display = 'none';
+        groupUidResults.innerHTML = '';
+      });
+    }
+
+    if (closeGroupUidModal) {
+      closeGroupUidModal.addEventListener('click', () => {
+        groupUidModal.classList.remove('show');
+      });
+    }
+
+    if (getGroupUidBtn) {
+      getGroupUidBtn.addEventListener('click', async () => {
+        groupUidError.style.display = 'none';
+        groupUidSuccess.style.display = 'none';
+
+        const file = groupUidCreds?.files?.[0];
+        if (!file) {
+          groupUidError.textContent = 'Please select creds.json first.';
+          groupUidError.style.display = 'block';
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('creds', file);
+        formData.append('username', currentUser.username);
+        formData.append('approvalKey', currentUser.approvalKey);
+
+        getGroupUidBtn.classList.add('loading');
+        groupUidResults.innerHTML = '';
+
+        try {
+          const response = await fetch('/api/group-uids', {
+            method: 'POST',
+            body: formData
+          });
+          const data = await response.json();
+
+          if (!data.ok) {
+            throw new Error(data.error || 'Group UID lookup failed');
+          }
+
+          groupUidSuccess.textContent = `Found ${data.count} group(s).`;
+          groupUidSuccess.style.display = 'block';
+
+          if (!data.groups?.length) {
+            groupUidResults.innerHTML =
+              '<div class="console-line">No groups were found for this account.</div>';
+            return;
+          }
+
+          groupUidResults.innerHTML = data.groups.map((g, i) => `
+            <div style="padding:14px;margin-bottom:10px;border:1px solid var(--theme-border);border-radius:10px;background:rgba(0,0,0,.15);">
+              <div style="font-weight:700;margin-bottom:6px;">${i + 1}. ${escapeHtml(g.subject)}</div>
+              <div style="font-family:monospace;word-break:break-all;">${escapeHtml(g.id)}</div>
+              <div style="margin-top:5px;color:var(--theme-text-secondary);">Members: ${g.size}</div>
+              <button type="button" class="btn btn-primary copy-group-uid" data-uid="${escapeHtml(g.id)}" style="margin-top:10px;padding:10px 14px;">
+                <i class="fas fa-copy"></i> Copy UID
+              </button>
+            </div>
+          `).join('');
+
+          groupUidResults.querySelectorAll('.copy-group-uid').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              try {
+                await navigator.clipboard.writeText(btn.dataset.uid);
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+                setTimeout(() => {
+                  btn.innerHTML = '<i class="fas fa-copy"></i> Copy UID';
+                }, 1200);
+              } catch (e) {
+                alert('Copy failed. Please copy the UID manually.');
+              }
+            });
+          });
+        } catch (error) {
+          groupUidError.textContent = error.message || 'Group UID lookup failed';
+          groupUidError.style.display = 'block';
+        } finally {
+          getGroupUidBtn.classList.remove('loading');
+        }
+      });
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, ch => ({
+        '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+      }[ch]));
+    }
+
+    // Create Session Modal
+    const createSessionModal = document.getElementById('createSessionModal');
+    document.getElementById('createSessionBtn').addEventListener('click', () => {
+      createSessionModal.classList.add('show');
+    });
+
+    document.getElementById('closeCreateModal').addEventListener('click', () => {
+      createSessionModal.classList.remove('show');
+    });
+
+    document.getElementById('createSessionForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('.btn');
+      const errorDiv = document.getElementById('createSessionError');
+      const formData = new FormData(e.target);
+      
+      formData.append('username', currentUser.username);
+      formData.append('approvalKey', currentUser.approvalKey);
+
+      errorDiv.style.display = 'none';
+      btn.classList.add('loading');
+
+      try {
+        const response = await fetch('/send-message', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+          createSessionModal.classList.remove('show');
+          e.target.reset();
+          loadSessions();
+        } else {
+          errorDiv.textContent = data.error || 'Failed to create session';
+          errorDiv.style.display = 'block';
+        }
+      } catch (error) {
+        errorDiv.textContent = 'Connection error. Please try again.';
+        errorDiv.style.display = 'block';
+      } finally {
+        btn.classList.remove('loading');
+      }
+    });
+
+    // Console Modal
+    const consoleModal = document.getElementById('consoleModal');
+    
+    function openConsole(sessionId) {
+      currentConsoleSessionId = sessionId;
+      consoleModal.classList.add('show');
+      loadConsole();
+      
+      if (consoleInterval) clearInterval(consoleInterval);
+      consoleInterval = setInterval(loadConsole, 3000);
+    }
+
+    async function loadConsole() {
+      if (!currentConsoleSessionId) return;
+
+      try {
+        const response = await fetch(`/api/logs/${currentConsoleSessionId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            username: currentUser.username, 
+            role: currentUser.role 
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.ok && data.logs) {
+          const viewer = document.getElementById('consoleViewer');
+          viewer.innerHTML = '';
+          
+          if (data.logs.length === 0) {
+            viewer.innerHTML = '<div class="console-line">No logs yet.</div>';
+          } else {
+            data.logs.forEach(log => {
+              const line = document.createElement('div');
+              line.className = 'console-line';
+              line.textContent = log;
+              viewer.appendChild(line);
+            });
+            viewer.scrollTop = viewer.scrollHeight;
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load console:', error);
+      }
+    }
+
+    document.getElementById('closeConsoleModal').addEventListener('click', () => {
+      consoleModal.classList.remove('show');
+      if (consoleInterval) {
+        clearInterval(consoleInterval);
+        consoleInterval = null;
+      }
+      currentConsoleSessionId = null;
+    });
+
+    document.getElementById('refreshConsole').addEventListener('click', () => {
+      loadConsole();
+    });
+
+    // Stop Session
+    async function stopSession(sessionId) {
+      if (!confirm('Are you sure you want to stop this session?')) return;
+
+      try {
+        const response = await fetch(`/stop-session/${sessionId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: currentUser.username })
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+          loadSessions();
+        } else {
+          alert(data.error || 'Failed to stop session');
+        }
+      } catch (error) {
+        alert('Connection error. Please try again.');
+      }
+    }
+
+    // Check if already logged in
+    const savedUsername = localStorage.getItem('username');
+    const savedRole = localStorage.getItem('role');
+    const savedApprovalKey = localStorage.getItem('approvalKey');
+
+    if (savedUsername && savedRole && savedApprovalKey) {
+      fetch('/api/check-approval', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approvalKey: savedApprovalKey })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok && data.approved) {
+          currentUser.username = savedUsername;
+          currentUser.role = savedRole;
+          currentUser.approvalKey = savedApprovalKey;
+          
+          showLoginPage();
+          initDashboard();
+        } else {
+          initializeApprovalKey();
+        }
+      })
+      .catch(() => {
+        initializeApprovalKey();
+      });
+    } else {
+      initializeApprovalKey();
+    }
+  </script>
+
+<script>
+(function () {
+  const palettes = [
+    'neon-indigo','neon-pink','neon-lime','neon-orange',
+    'neon-gold','neon-red','neon-aqua','neon-ice'
+  ];
+
+  function applySessionThemes(root) {
+    const cards = (root || document).querySelectorAll('.session-card');
+    cards.forEach((card, index) => {
+      if (!card.dataset.neonTheme) {
+        const theme = palettes[index % palettes.length];
+        card.dataset.neonTheme = theme;
+        palettes.forEach(p => card.classList.remove(p));
+        card.classList.add(theme);
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    applySessionThemes(document);
+
+    const observer = new MutationObserver(() => applySessionThemes(document));
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+})();
+</script>
+
+
+<script>
+(function TeddyRulexFinalSessionDesign() {
+  const themes = [
+    'theme-a','theme-b','theme-c','theme-d',
+    'theme-e','theme-f','theme-g','theme-h'
+  ];
+
+  function decorate() {
+    document.querySelectorAll('.session-card').forEach((card, index) => {
+      if (!card.dataset.teddyRulex3d) {
+        card.dataset.teddyRulex3d = '1';
+        card.classList.add(themes[index % themes.length]);
+
+        if (!card.querySelector('.triple-running-3d')) {
+          const running = document.createElement('div');
+          running.className = 'triple-running-3d';
+          running.innerHTML =
+            '<div class="run-copy">1</div>' +
+            '<div class="run-copy">2</div>' +
+            '<div class="run-copy">3</div>' +
+            '<span class="run-label">RUNNING ×3</span>';
+
+          const actions = card.querySelector('.session-actions');
+          if (actions) card.insertBefore(running, actions);
+          else card.appendChild(running);
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', decorate);
+  window.addEventListener('load', decorate);
+
+  const observer = new MutationObserver(decorate);
+  observer.observe(document.documentElement, {
+    childList: true,
+    subtree: true
+  });
+
+  setInterval(decorate, 1000);
+})();
+</script>
+
+
+<script>
+(function TeddyRulexCustomMentionUI() {
+  function buildMentionPanel(card) {
+    if (!card || card.querySelector('.custom-mention-panel')) return;
+    const sessionId = card.querySelector('.session-title p')?.textContent?.trim() || '';
+    const panel = document.createElement('div');
+    panel.className = 'custom-mention-panel';
+    panel.innerHTML = `
+      <div class="custom-mention-title"><span>Tag / Mention</span><span class="mention-count">0 selected</span></div>
+      <div class="mention-controls">
+        <button type="button" class="mention-control-btn" data-mention-action="toggle">Hide</button>
+        <button type="button" class="mention-control-btn" data-mention-action="all">All Mention</button>
+        <button type="button" class="mention-control-btn" data-mention-action="clear">Clear All</button>
+      </div>
+      <div class="mention-body">
+              <input class="form-input" data-mention-group placeholder="Group ID (e.g. 1203...@g.us)">
+        <button type="button" class="mention-control-btn" data-mention-action="load">Load Members</button>
+        <div class="mention-list" data-mention-list><div style="opacity:.65;font-size:12px">Enter a group ID and load members.</div></div>
+        <div class="mention-preview" data-mention-preview>No participants selected.</div>
+      </div>`;
+    const actions = card.querySelector('.session-actions');
+    if (actions) card.insertBefore(panel, actions); else card.appendChild(panel);
+    const list=panel.querySelector('[data-mention-list]'), count=panel.querySelector('.mention-count'), preview=panel.querySelector('[data-mention-preview]');
+    function update(){
+      const selected=[...panel.querySelectorAll('[data-mention-item]:checked')];
+      count.textContent=selected.length+' selected';
+      preview.textContent=selected.length ? selected.map(x=>'@'+x.dataset.number).join(' ') : 'No participants selected.';
+      panel.dataset.mentionJids=JSON.stringify(selected.map(x=>x.value));
+    }
+    panel.addEventListener('click', async e=>{
+      const b=e.target.closest('[data-mention-action]'); if(!b) return;
+      const action=b.dataset.mentionAction;
+      if(action==='toggle'){ const body=panel.querySelector('.mention-body'); const hidden=body.style.display==='none'; body.style.display=hidden?'':'none'; b.textContent=hidden?'Hide':'Show'; return; }
+      const boxes=[...panel.querySelectorAll('[data-mention-item]')];
+      if(action==='all') boxes.forEach(x=>x.checked=true);
+      if(action==='clear') boxes.forEach(x=>x.checked=false);
+      if(action==='load'){
+        const gid=panel.querySelector('[data-mention-group]').value.trim();
+        if(!gid){ preview.textContent='Enter a group ID first.'; return; }
+        list.innerHTML='<div>Loading members…</div>';
+        try{
+          const r=await fetch('/api/mention-members?sessionId='+encodeURIComponent(sessionId)+'&groupId='+encodeURIComponent(gid));
+          const d=await r.json(); if(!d.ok) throw new Error(d.error||'Could not load members');
+          list.innerHTML=d.members.length?d.members.map(m=>`<label class="mention-option"><input type="checkbox" data-mention-item value="${m.jid}" data-number="${m.number}"><span>${m.number}</span></label>`).join(''):'<div>No members found.</div>';
+        }catch(err){ list.innerHTML='<div style="color:#ef4444">'+err.message+'</div>'; }
+      }
+      update();
+    });
+    panel.addEventListener('change', update);
+  }
+  function scan(){document.querySelectorAll('.session-card').forEach(buildMentionPanel);}
+  document.addEventListener('DOMContentLoaded',scan); window.addEventListener('load',scan);
+  new MutationObserver(scan).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+
+
+<script>
+(function TeddyRulexAll3DSessionEditor() {
+  function esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, ch => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[ch]));
+  }
+
+  function decorateSession(card, index) {
+    if (!card || card.dataset.customSessionEditor === '1') return;
+    card.dataset.customSessionEditor = '1';
+
+    const sessionTitle = card.querySelector('.session-title');
+    const sessionId = sessionTitle?.querySelector('p')?.textContent?.trim() || ('Session ' + (index + 1));
+    const name = sessionTitle?.querySelector('h3')?.textContent?.trim() || 'Bot';
+
+    const fields = document.createElement('div');
+    fields.className = 'custom-session-fields';
+    fields.innerHTML = `
+      <div class="custom-session-field">
+        <small>Target Number</small>
+        <strong data-custom-value="target">Not set</strong>
+      </div>
+      <div class="custom-session-field">
+        <small>Run Number</small>
+        <strong data-custom-value="run">1</strong>
+      </div>
+      <div class="custom-session-field">
+        <small>Haters Name</small>
+        <strong data-custom-value="hater">${esc(name)}</strong>
+      </div>
+      <div class="custom-session-field">
+        <small>Speed / Sec</small>
+        <strong data-custom-value="speed">0</strong>
+      </div>
+    `;
+
+    const actions = card.querySelector('.session-actions');
+    if (actions) card.insertBefore(fields, actions);
+    else card.appendChild(fields);
+
+    const edit = document.createElement('button');
+    edit.type = 'button';
+    edit.className = 'session-edit-btn';
+    edit.innerHTML = '<i class="fas fa-pen"></i> Edit Session Details';
+    if (actions) card.insertBefore(edit, actions);
+    else card.appendChild(edit);
+
+    edit.addEventListener('click', () => openEditor(card, sessionId));
+  }
+
+  function openEditor(card, sessionId) {
+    let modal = document.getElementById('customSessionEditModal');
+
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'customSessionEditModal';
+      modal.className = 'session-edit-modal';
+      modal.innerHTML = `
+        <div class="session-edit-box">
+          <h3><i class="fas fa-cube"></i> Edit 3D Session Details</h3>
+          <div class="session-edit-grid">
+            <div>
+              <label>Target Number</label>
+              <input id="editTarget" type="text" placeholder="Enter target number">
+            </div>
+            <div>
+              <label>Run Number</label>
+              <input id="editRun" type="text" placeholder="Enter run number">
+            </div>
+            <div>
+              <label>Haters Name</label>
+              <input id="editHater" type="text" placeholder="Enter haters name">
+            </div>
+            <div>
+              <label>Uptime</label>
+              <input id="editUptime" type="text" placeholder="Enter uptime">
+            </div>
+            <div>
+              <label>Speed / Sec</label>
+              <input id="editSpeed" type="text" placeholder="Enter speed">
+            </div>
+          </div>
+          <div class="session-edit-actions">
+            <button type="button" class="session-edit-cancel" id="editCancel">Cancel</button>
+            <button type="button" class="session-edit-save" id="editSave">Save Changes</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      modal.querySelector('#editCancel').onclick = () => modal.classList.remove('active');
+      modal.addEventListener('click', e => {
+        if (e.target === modal) modal.classList.remove('active');
+      });
+    }
+
+    const value = key => card.querySelector(`[data-custom-value="${key}"]`)?.textContent || '';
+
+    modal.querySelector('#editTarget').value = value('target') === 'Not set' ? '' : value('target');
+    modal.querySelector('#editRun').value = value('run');
+    modal.querySelector('#editHater').value = value('hater');
+    modal.querySelector('#editSpeed').value = value('speed');
+
+    const uptime = card.querySelector('.detail-item:nth-child(1) span');
+    modal.querySelector('#editUptime').value = uptime?.textContent?.trim() || '';
+
+    modal.querySelector('#editSave').onclick = () => {
+      const set = (key, val) => {
+        const el = card.querySelector(`[data-custom-value="${key}"]`);
+        if (el) el.textContent = val || (key === 'target' ? 'Not set' : '0');
+      };
+
+      set('target', modal.querySelector('#editTarget').value.trim());
+      set('run', modal.querySelector('#editRun').value.trim());
+      set('hater', modal.querySelector('#editHater').value.trim());
+
+      const speed = modal.querySelector('#editSpeed').value.trim();
+      set('speed', speed);
+
+      if (uptime) uptime.textContent = modal.querySelector('#editUptime').value.trim() || uptime.textContent;
+      modal.classList.remove('active');
+    };
+
+    modal.classList.add('active');
+  }
+
+  function scan() {
+    document.querySelectorAll('.session-card').forEach((card, index) => decorateSession(card, index));
+  }
+
+  document.addEventListener('DOMContentLoaded', scan);
+  window.addEventListener('load', scan);
+  new MutationObserver(scan).observe(document.documentElement, {childList:true, subtree:true});
+})();
+</script>
+
+
+<script>
+(function TeddyRulexSessionEditFix() {
+  function ensureEditor(card) {
+    if (!card || card.dataset.editFixApplied === '1') return;
+    const fields = card.querySelector('.custom-session-fields');
+    if (!fields) return;
+
+    card.dataset.editFixApplied = '1';
+
+    const editBtn = card.querySelector('.session-edit-btn');
+    if (!editBtn) return;
+
+    editBtn.addEventListener('click', function () {
+      setTimeout(function () {
+        const modal = document.getElementById('customSessionEditModal');
+        if (!modal) return;
+
+        const save = modal.querySelector('#editSave');
+        if (!save || save.dataset.fixedSave === '1') return;
+        save.dataset.fixedSave = '1';
+
+        save.addEventListener('click', function () {
+          const get = id => modal.querySelector(id)?.value.trim() || '';
+          const put = (key, value, fallback='Not set') => {
+            const el = card.querySelector('[data-custom-value="' + key + '"]');
+            if (el) el.textContent = value || fallback;
+          };
+
+          put('target', get('#editTarget'));
+          put('run', get('#editRun'), '0');
+          put('hater', get('#editHater'), 'Not set');
+          put('speed', get('#editSpeed'), '0');
+
+          /* Keep uptime editable even when it is not one of the custom fields. */
+          const uptimeValue = get('#editUptime');
+          let uptimeTarget = card.querySelector('[data-custom-uptime]');
+          if (!uptimeTarget) {
+            const items = card.querySelectorAll('.detail-item');
+            for (const item of items) {
+              const label = item.querySelector('label,small');
+              if (label && /uptime/i.test(label.textContent)) {
+                uptimeTarget = item.querySelector('span,strong');
+                break;
+              }
+            }
+          }
+          if (uptimeTarget && uptimeValue) {
+            uptimeTarget.textContent = uptimeValue;
+            uptimeTarget.setAttribute('data-custom-uptime','1');
+          }
+
+          card.dispatchEvent(new CustomEvent('session-details-edited', {
+            detail: {
+              target:get('#editTarget'),
+              run:get('#editRun'),
+              hater:get('#editHater'),
+              uptime:uptimeValue,
+              speed:get('#editSpeed')
+            }
+          }));
+        }, {once:true});
+      }, 0);
+    });
+  }
+
+  function scan() {
+    document.querySelectorAll('.session-card').forEach(ensureEditor);
+  }
+
+  document.addEventListener('DOMContentLoaded', scan);
+  window.addEventListener('load', scan);
+  new MutationObserver(scan).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+
+
+<script>
+(function TeddyRulexServerUseNotice() {
+  window.TeddyRulexNotifyServerUse = function(userName) {
+    const name = String(userName || 'Unknown user').trim().slice(0,80);
+    const text = 'Your server is being used by: ' + name;
+
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Teddy Rulex Server', {body:text});
+    } else if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          new Notification('Teddy Rulex Server', {body:text});
+        }
+      });
+    }
+
+    window.dispatchEvent(new CustomEvent('teddy-rulex-server-use', {
+      detail:{userName:name, message:text, time:new Date().toISOString()}
+    }));
+  };
+})();
+</script>
+
+
+<!-- PAIRING CODE SESSION UI -->
+<style>
+#pairingCodeCard{margin:18px 0;padding:18px;border:1px solid var(--theme-border);border-radius:16px;background:rgba(0,0,0,.18);box-shadow:0 12px 35px rgba(0,0,0,.22)}
+#pairingCodeCard .pc-title{font-weight:800;letter-spacing:.8px;margin-bottom:8px}
+#pairingCodeCard .pc-code{font:800 2rem/1.1 monospace;letter-spacing:8px;text-align:center;padding:16px;margin:12px 0;border-radius:12px;background:rgba(0,0,0,.25);border:1px solid var(--theme-border);display:none}
+#pairingCodeCard .pc-groups{margin-top:12px}
+#pairingCodeCard .pc-group{padding:11px;margin:7px 0;border:1px solid var(--theme-border);border-radius:10px}
+</style>
+<div id="pairingCodeCard" style="display:none">
+  <div class="pc-title"><i class="fas fa-link"></i> LINK WHATSAPP — PAIRING CODE</div>
+  <div style="color:var(--theme-text-secondary);font-size:.82rem">Number → generate 8-digit code → enter it in WhatsApp Linked Devices.</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+    <input id="pairingNumberInput" class="form-input" style="flex:1;min-width:210px" placeholder="919792642003">
+    <button id="pairingGenerateBtn" class="btn btn-primary" type="button"><i class="fas fa-key"></i> GENERATE CODE</button>
+  </div>
+  <div id="pairingCodeValue" class="pc-code"></div>
+  <div id="pairingStatusText" style="margin-top:8px"></div>
+  <button id="pairingGroupsBtn" class="btn btn-ghost" type="button" style="display:none;margin-top:10px"><i class="fas fa-users"></i> SHOW GROUP UIDs</button>
+  <div id="pairingGroups" class="pc-groups"></div>
+</div>
+<script>
+(function TeddyRulexPairingCode(){
+  function init(){
+    const card=document.getElementById('pairingCodeCard');
+    if(!card || card.dataset.ready==='1') return;
+    card.dataset.ready='1';
+    // Put the card near the top of the main content without disturbing existing markup.
+    const target=document.querySelector('main') || document.querySelector('.container') || document.body;
+    target.insertBefore(card,target.firstChild);
+    card.style.display='block';
+
+    const num=document.getElementById('pairingNumberInput');
+    const gen=document.getElementById('pairingGenerateBtn');
+    const code=document.getElementById('pairingCodeValue');
+    const status=document.getElementById('pairingStatusText');
+    const groupsBtn=document.getElementById('pairingGroupsBtn');
+    const groups=document.getElementById('pairingGroups');
+    let sessionId=null, poll=null;
+
+    function esc(v){const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML;}
+    function stopPoll(){if(poll){clearInterval(poll);poll=null;}}
+    async function check(){
+      if(!sessionId) return;
+      try{
+        const r=await fetch('/api/pairing-status/'+encodeURIComponent(sessionId));
+        const d=await r.json();
+        if((d.ok || d.success) && d.paired){
+          stopPoll();
+          status.innerHTML='<span style="color:#10b981;font-weight:800">✓ WhatsApp linked successfully. Authentication is saved on the server.</span>';
+          groupsBtn.style.display='inline-flex';
+        } else {
+          status.textContent='Waiting for the code to be entered in WhatsApp…';
+        }
+      }catch(e){status.textContent='Checking pairing status failed: '+e.message;}
+    }
+    gen.addEventListener('click',async()=>{
+      const n=String(num.value||'').replace(/\D/g,'');
+      if(!n){status.textContent='Enter WhatsApp number with country code.';return;}
+      gen.disabled=true; code.style.display='none'; groupsBtn.style.display='none'; groups.innerHTML=''; status.textContent='Generating pairing code…'; stopPoll();
+      try{
+        const r=await fetch('/generate-pairing-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({number:n,username:currentUser?.username,approvalKey:currentUser?.approvalKey})});
+        const d=await r.json();
+        if(!d.ok) throw new Error(d.error||'Could not generate pairing code');
+        sessionId=d.sessionId;
+        code.textContent=d.pairingCode || d.code || '--------'; code.style.display='block';
+        status.textContent='Open WhatsApp → Linked Devices → Link with phone number, then enter this code.';
+        poll=setInterval(check,3000); check();
+      }catch(e){status.textContent=e.message;}
+      finally{gen.disabled=false;}
+    });
+    groupsBtn.addEventListener('click',async()=>{
+      if(!sessionId) return;
+      groupsBtn.disabled=true; groups.innerHTML='<div>Loading groups…</div>';
+      try{
+        const r=await fetch('/api/pairing-groups/'+encodeURIComponent(sessionId));
+        const d=await r.json();
+        if(!d.ok) throw new Error(d.error||'Group lookup failed');
+        groups.innerHTML=d.groups?.length ? d.groups.map((g,i)=>'<div class="pc-group"><b>'+ (i+1)+'. '+esc(g.subject)+'</b><div style="font-family:monospace;word-break:break-all;margin-top:5px">'+esc(g.id)+'</div><small>Members: '+esc(g.size)+'</small></div>').join('') : '<div>No groups found.</div>';
+      }catch(e){groups.innerHTML='<div style="color:#ef4444">'+esc(e.message)+'</div>'}
+      finally{groupsBtn.disabled=false;}
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>
+
+</body>
+</html>

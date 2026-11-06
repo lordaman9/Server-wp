@@ -1,0 +1,20 @@
+{
+  "name": "aman-whatsapp-server",
+  "version": "3.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "check": "node --check index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "multer": "^2.0.0",
+    "pino": "^9.7.0",
+    "chalk": "^4.1.2",
+    "@whiskeysockets/baileys": "7.0.0-rc14"
+  }
+}
